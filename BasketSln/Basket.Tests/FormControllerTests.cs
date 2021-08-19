@@ -1,0 +1,39 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Basket.Controllers;
+using Basket.Models.Entities;
+using Basket.Models.Repositories;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using Xunit;
+
+namespace Basket.Tests
+{
+    public class FormControllerTests
+    {
+        [Fact]
+        public void Can_Use_Repository()
+        {
+            // Arrange
+            Mock<IBasketRepository> mock = new Mock<IBasketRepository>();
+            mock.Setup(m => m.Forms).Returns((new Form[]
+            {
+                new Form {FormID = 1, Name = "F1"},
+                new Form {FormID = 2, Name = "F2"}
+            }).AsQueryable<Form>());
+            
+            FormController controller = new FormController(mock.Object);
+            
+            // Act
+            IEnumerable<Form> result = (controller.Index() as ViewResult)?.ViewData.Model
+                as IEnumerable<Form>;
+            
+            // Assert
+            Form[] formArray = (result ?? new List<Form>()).ToArray();
+            Assert.True(formArray.Length == 2);
+            Assert.Equal("F1", formArray[0].Name);
+            Assert.Equal("F2", formArray[1].Name);
+        }
+    }
+}
